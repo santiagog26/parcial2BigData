@@ -1,0 +1,27 @@
+{
+    "dev": {
+        "aws_region": "us-east-1",
+        "profile_name": "default",
+        "project_name": "noticiasathena",
+        "runtime": "python3.8",
+        "s3_bucket": "zappa-parcial2",
+        "keep_warm": false,
+        "apigateway_enabled": false,
+        "events": [{
+            "function": "app.noticias_info",
+            "event_source": {
+                  "arn":  "arn:aws:s3:::zappa-parcial2-descargas-noticias",
+                  "events": [
+                    "s3:ObjectCreated:*"              ]
+               }
+            },{
+                "function": "app.lambda_handler",
+                "event_source": {
+                      "arn":  "arn:aws:s3:::zappa-parcial2",
+                      "events": [
+                        "s3:ObjectCreated:*"              ]
+                   }
+                }
+        ]
+    }
+}
