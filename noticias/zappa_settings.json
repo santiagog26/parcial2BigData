@@ -5,6 +5,8 @@
         "profile_name": "default",
         "project_name": "noticias",
         "runtime": "python3.8",
-        "s3_bucket": "zappa-parcial2"
+        "s3_bucket": "zappa-parcial2",
+        "keep_warm": false,
+        "apigateway_enabled": false
     }
 }
