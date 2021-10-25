@@ -1,19 +1,29 @@
-import json
-import urllib, urllib.request
-from urllib import request
+import requests
+import boto3
+import time
 
-def handler(event, context):
-    print("hello from zappa")
-    print(event)
-    return {'status': 200}
+bucket="zappa-parcial2-descargas"
+def handler(event,context):
 
+	localtime=time.localtime()
+	
+	s3 = boto3.resource('s3')
+	getHTMLFinances("Avianca","https://query1.finance.yahoo.com/v7/finance/download/AVHOQ?period1=1634601600&period2=1634688000&interval=1d&events=history&includeAdjustedClose=true",localtime,bucket,s3)
+	getHTMLFinances("Ecopetrol","https://query1.finance.yahoo.com/v7/finance/download/EC?period1=1634774400&period2=1634860800&interval=1d&events=history&includeAdjustedClose=true",localtime,bucket,s3)
+	getHTMLFinances("GrupoAval","https://query1.finance.yahoo.com/v7/finance/download/AVAL?period1=1634774400&period2=1634860800&interval=1d&events=history&includeAdjustedClose=true",localtime,bucket,s3)
+	getHTMLFinances("CementosArgos","https://query1.finance.yahoo.com/v7/finance/download/CMTOY?period1=1634774400&period2=1634860800&interval=1d&events=history&includeAdjustedClose=true",localtime,bucket,s3)
 
-def descargarPagina(event, context):
-    with urllib.request.urlopen('https://www.elespectador.com/') as handler:
-        html = str(handler.read(), 'utf-8')
-        with open('el_espectador.html','w') as file_handler:
-            file_handler.write(html)
-    with urllib.request.urlopen('https://www.eltiempo.com/') as handler2:
-        html2 = str(handler2.read(), 'utf-8')
-        with open('eltiempo.html','w') as file_handler2:
-            file_handler2.write(html2)   
+	return {
+			"status_code":200
+		}
+
+def getHTMLFinances(name, url,localtime,bucketname,s3):	
+	headers = {'User-Agent': 'Mozilla'}
+	r = requests.get(url, headers=headers)
+	filepath="/tmp/"+name+".csv"
+	f = open(filepath,"w")
+	print("Saving file from "+name)
+	f.write(r.text)
+	f.close()
+	path = 'stocks/company='+name+'/year='+str(localtime.tm_year)+'/month='+str(localtime.tm_mon)+'/day='+str(localtime.tm_mday)+'/'+str(localtime.tm_hour)+str(localtime.tm_min)+str(localtime.tm_sec)+'page.csv'
+	s3.meta.client.upload_file(filepath, bucketname, path)
